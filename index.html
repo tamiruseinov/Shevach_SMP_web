@@ -5,103 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Join the Minecraft Server</title>
   <style>
-    /* Reset */
-    * {
-      box-sizing: border-box;
-    }
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #c0c0c0; /* classic Windows grey */
-      height: 100vh;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #202225;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
+      margin: 0;
     }
     .form-container {
-      background: #ececec;
-      border: 2px solid #000080; /* classic dark blue border */
-      width: 360px;
-      padding: 20px;
-      box-shadow: 4px 4px 0 #404040; /* simple shadow */
-      position: relative;
-    }
-    .form-header {
-      background: linear-gradient(to bottom, #000080, #0000cd);
-      color: white;
-      padding: 6px 10px;
-      font-weight: bold;
-      font-size: 16px;
-      user-select: none;
-      margin: -20px -20px 20px -20px;
-      border-bottom: 2px solid #000080;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      color: #000080;
-      margin-bottom: 4px;
-      font-weight: 600;
-      text-shadow: 1px 1px white;
-    }
-    input[type="text"],
-    input[type="number"] {
+      background: #2f3136;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
       width: 100%;
-      height: 26px;
-      padding: 2px 6px;
-      border: 1px solid #808080;
-      background: white;
-      font-size: 14px;
-      margin-bottom: 12px;
-      box-shadow:
-        inset 1px 1px 0 #fff,
-        inset -1px -1px 0 #a0a0a0;
-      border-radius: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
     }
     input[type="submit"] {
-      width: 100%;
-      height: 28px;
-      background: linear-gradient(to bottom, #0a64ad, #004080);
-      border: 1px solid #000080;
+      background: #43b581;
       color: white;
-      font-weight: bold;
-      font-size: 14px;
       cursor: pointer;
-      box-shadow:
-        1px 1px 0 #000080;
-      user-select: none;
-      transition: background 0.2s;
     }
     input[type="submit"]:hover {
-      background: linear-gradient(to bottom, #154c86, #002851);
+      background: #369f6e;
     }
     .message {
-      margin-top: 12px;
-      font-weight: bold;
-      color: #004080;
+      margin-top: 10px;
       text-align: center;
-      min-height: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="form-container" role="form" aria-label="Join Minecraft Server Form">
-    <div class="form-header">Please Fill This To Play On Our Server</div>
-    <form id="mcForm" autocomplete="off" novalidate>
-      <label for="full_name">Full Name</label>
-      <input id="full_name" type="text" name="full_name" placeholder="Full Name" required />
-
-      <label for="age">Age</label>
-      <input id="age" type="number" name="age" placeholder="Age" required min="5" max="120" />
-
-      <label for="class">Class (e.g. 8A)</label>
-      <input id="class" type="text" name="class" placeholder="Class (e.g. 8A)" required />
-
-      <label for="nickname">Minecraft Nickname</label>
-      <input id="nickname" type="text" name="nickname" placeholder="Minecraft Nickname" required />
-
+  <div class="form-container">
+    <h2>Join Our MC Server</h2>
+    <form id="mcForm">
+      <input type="text" name="full_name" placeholder="Full Name" required />
+      <input type="number" name="age" placeholder="Age" required />
+      <input type="text" name="class" placeholder="Class (e.g. 8A)" required />
+      <input type="text" name="nickname" placeholder="Minecraft Nickname" required />
       <input type="submit" value="Submit" />
       <div class="message" id="formMessage"></div>
     </form>
@@ -111,31 +66,26 @@
     const form = document.getElementById("mcForm");
     const msg = document.getElementById("formMessage");
 
-    // Replace with your real SheetDB API URL:
+    // 🔁 Replace with your real SheetDB API URL:
     const SHEETDB_API = "https://sheetdb.io/api/v1/bqauqq803k7zo";
 
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
-      msg.textContent = "Submitting...";
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => data[key] = value);
 
-      try {
-        const response = await fetch(SHEETDB_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data })
-        });
+      const response = await fetch(SHEETDB_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data })
+      });
 
-        if (response.ok) {
-          msg.textContent = "✅ Submitted successfully!";
-          form.reset();
-        } else {
-          msg.textContent = "❌ Something went wrong.";
-        }
-      } catch (error) {
-        msg.textContent = "❌ Network error.";
+      if (response.ok) {
+        msg.textContent = "✅ Submitted successfully!";
+        form.reset();
+      } else {
+        msg.textContent = "❌ Something went wrong.";
       }
     });
   </script>
