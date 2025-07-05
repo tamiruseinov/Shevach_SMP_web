@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shevach SMP</title>
+  <title>Join the Minecraft Server</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -34,11 +34,13 @@
       border: none;
       border-radius: 6px;
       font-size: 16px;
+      color: #000;
     }
     input[type="submit"] {
       background: #43b581;
       color: white;
       cursor: pointer;
+      font-weight: bold;
     }
     input[type="submit"]:hover {
       background: #369f6e;
@@ -46,6 +48,13 @@
     .message {
       margin-top: 10px;
       text-align: center;
+      color: #ff5555;
+      font-weight: bold;
+      min-height: 20px;
+    }
+    input[readonly] {
+      background: #d3d3d3;
+      color: #000;
     }
   </style>
 </head>
@@ -53,10 +62,10 @@
   <div class="form-container">
     <h2>Join Our MC Server</h2>
     <form id="mcForm">
-      <input type="text" name="full_name" placeholder="Full Name" required />
-      <input type="number" name="age" placeholder="Age" required />
-      <input type="text" name="class" placeholder="Class (e.g. 8A)" required />
-      <input type="text" name="nickname" placeholder="Minecraft Nickname" required />
+      <input type="text" name="full_name" placeholder="Full Name" required autocomplete="off" />
+      <input type="number" id="age" name="age" placeholder="Age" required autocomplete="off" min="12" max="120" />
+      <input type="text" id="class" name="class" placeholder="Class (e.g. 8A)" required autocomplete="off" />
+      <input type="text" name="nickname" placeholder="Minecraft Nickname" required autocomplete="off" />
       <input type="submit" value="Submit" />
       <div class="message" id="formMessage"></div>
     </form>
@@ -65,27 +74,113 @@
   <script>
     const form = document.getElementById("mcForm");
     const msg = document.getElementById("formMessage");
+    const ageInput = document.getElementById("age");
+    const classInput = document.getElementById("class");
 
-    // 🔁 Replace with your real SheetDB API URL:
-    const SHEETDB_API = "https://sheetdb.io/api/v1/bqauqq803k7zo";
+    // List of offensive words to block (case insensitive)
+    const forbiddenWords = [
+      "nigger",
+      "nigga",
+      // add more words here
+    ];
+
+    function containsForbiddenWord(text) {
+      if (!text) return false;
+      const lower = text.toLowerCase();
+      return forbiddenWords.some(word => lower.includes(word));
+    }
+
+    function getGradeByAge(age) {
+      if (age >= 12 && age < 13) return "7";
+      if (age >= 13 && age < 14) return "8";
+      if (age >= 14 && age < 15) return "9";
+      if (age >= 15 && age < 16) return "10";
+      if (age >= 16 && age < 17) return "11";
+      if (age >= 17 && age < 19) return "12";
+      return "";
+    }
+
+    ageInput.addEventListener("input", () => {
+      const age = parseInt(ageInput.value);
+      if (isNaN(age)) {
+        classInput.value = "";
+        msg.textContent = "";
+        return;
+      }
+      if (age < 12) {
+        msg.textContent = "❌ Age must be 12 or older.";
+        classInput.value = "";
+      } else {
+        msg.textContent = "";
+        const grade = getGradeByAge(age);
+        if (grade) {
+          let currentClass = classInput.value.toUpperCase();
+          if (!currentClass.startsWith(grade)) {
+            let suffix = "";
+            if (currentClass.length > 1) {
+              suffix = currentClass.slice(1);
+              suffix = suffix.replace(/[^A-Z]/g, "");
+            }
+            classInput.value = grade + suffix;
+          }
+        } else {
+          classInput.value = "";
+        }
+      }
+    });
 
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
+      msg.style.color = "#ff5555";
+
+      const age = parseInt(ageInput.value);
+      if (isNaN(age) || age < 12) {
+        msg.textContent = "❌ Age must be 12 or older.";
+        return;
+      }
+
+      const grade = getGradeByAge(age);
+      if (!classInput.value || !classInput.value.startsWith(grade)) {
+        msg.textContent = `❌ Class should start with grade ${grade} based on your age.`;
+        return;
+      }
+
+      // Check all inputs for forbidden words
+      const inputs = form.querySelectorAll("input[type='text'], input[type='number']");
+      for (const input of inputs) {
+        if (containsForbiddenWord(input.value)) {
+          msg.textContent = "❌ Your input contains forbidden words.";
+          return;
+        }
+      }
+
+      msg.textContent = "Submitting...";
+      msg.style.color = "#fff";
+
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => data[key] = value);
 
-      const response = await fetch(SHEETDB_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data })
-      });
+      // Replace with your real SheetDB API URL:
+      const SHEETDB_API = "https://sheetdb.io/api/v1/bqauqq803k7zo";
 
-      if (response.ok) {
-        msg.textContent = "✅ Submitted successfully!";
-        form.reset();
-      } else {
-        msg.textContent = "❌ Something went wrong.";
+      try {
+        const response = await fetch(SHEETDB_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data })
+        });
+
+        if (response.ok) {
+          msg.style.color = "#43b581";
+          msg.textContent = "✅ Submitted successfully!";
+          form.reset();
+          classInput.value = "";
+        } else {
+          msg.textContent = "❌ Something went wrong.";
+        }
+      } catch (error) {
+        msg.textContent = "❌ Network error.";
       }
     });
   </script>
