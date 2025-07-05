@@ -14,6 +14,8 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .form-container {
       background: #2f3136;
@@ -25,7 +27,18 @@
     }
     h2 {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      background: #40444b;
+      color: #fff;
     }
     input {
       width: 100%;
@@ -41,6 +54,7 @@
       color: white;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.3s;
     }
     input[type="submit"]:hover {
       background: #369f6e;
@@ -48,9 +62,8 @@
     .message {
       margin-top: 10px;
       text-align: center;
-      color: #ff5555;
       font-weight: bold;
-      min-height: 20px;
+      min-height: 24px;
     }
     input[readonly] {
       background: #d3d3d3;
@@ -59,14 +72,19 @@
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>Join Our MC Server</h2>
-    <form id="mcForm">
-      <input type="text" name="full_name" placeholder="Full Name" required autocomplete="off" />
-      <input type="number" id="age" name="age" placeholder="Age" required autocomplete="off" min="12" max="120" />
-      <input type="text" id="class" name="class" placeholder="Class (e.g. 8A)" required autocomplete="off" />
-      <input type="text" name="nickname" placeholder="Minecraft Nickname" required autocomplete="off" />
-      <input type="submit" value="Submit" />
+  <div class="form-container" role="form" aria-label="Join Minecraft Server Form">
+    <select id="langSelect" aria-label="Select language">
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+      <option value="he">עברית</option>
+    </select>
+    <h2 id="formTitle">Join Our MC Server</h2>
+    <form id="mcForm" autocomplete="off" novalidate>
+      <input type="text" id="full_name" name="full_name" placeholder="Full Name" required />
+      <input type="number" id="age" name="age" placeholder="Age" required min="12" max="120" />
+      <input type="text" id="class" name="class" placeholder="Class (e.g. 8A)" required />
+      <input type="text" id="nickname" name="nickname" placeholder="Minecraft Nickname" required />
+      <input type="submit" id="submitBtn" value="Submit" />
       <div class="message" id="formMessage"></div>
     </form>
   </div>
@@ -76,18 +94,85 @@
     const msg = document.getElementById("formMessage");
     const ageInput = document.getElementById("age");
     const classInput = document.getElementById("class");
+    const langSelect = document.getElementById("langSelect");
 
-    // List of offensive words to block (case insensitive)
+    const textContent = {
+      en: {
+        title: "Join Our MC Server",
+        placeholders: {
+          full_name: "Full Name",
+          age: "Age",
+          class: "Class (e.g. 8A)",
+          nickname: "Minecraft Nickname",
+        },
+        submit: "Submit",
+        messages: {
+          ageUnder12: "❌ Age must be 12 or older.",
+          classMismatch: (grade) => `❌ Class should start with grade ${grade} based on your age.`,
+          forbidden: "❌ Your input contains forbidden words.",
+          submitting: "Submitting...",
+          success: "✅ Submitted successfully!",
+          error: "❌ Something went wrong.",
+          networkError: "❌ Network error.",
+        }
+      },
+      ru: {
+        title: "Присоединиться к серверу MC",
+        placeholders: {
+          full_name: "Полное имя",
+          age: "Возраст",
+          class: "Класс (например, 8А)",
+          nickname: "Ник в Minecraft",
+        },
+        submit: "Отправить",
+        messages: {
+          ageUnder12: "❌ Возраст должен быть не менее 12 лет.",
+          classMismatch: (grade) => `❌ Класс должен начинаться с ${grade} на основе вашего возраста.`,
+          forbidden: "❌ В вашем вводе есть запрещённые слова.",
+          submitting: "Отправка...",
+          success: "✅ Успешно отправлено!",
+          error: "❌ Что-то пошло не так.",
+          networkError: "❌ Ошибка сети.",
+        }
+      },
+      he: {
+        title: "הצטרף לשרת MC שלנו",
+        placeholders: {
+          full_name: "שם מלא",
+          age: "גיל",
+          class: "כיתה (למשל, 8א)",
+          nickname: "כינוי Minecraft",
+        },
+        submit: "שלח",
+        messages: {
+          ageUnder12: "❌ הגיל חייב להיות 12 ומעלה.",
+          classMismatch: (grade) => `❌ הכיתה צריכה להתחיל ב-${grade} לפי הגיל שלך.`,
+          forbidden: "❌ הקלט שלך מכיל מילים אסורות.",
+          submitting: "שולח...",
+          success: "✅ נשלח בהצלחה!",
+          error: "❌ משהו השתבש.",
+          networkError: "❌ שגיאת רשת.",
+        }
+      }
+    };
+
+    // Offensive words list (in English only, can extend later)
     const forbiddenWords = [
       "nigger",
       "nigga",
-      // add more words here
     ];
+
+    function normalizeText(text) {
+      return text
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z]/g, "");
+    }
 
     function containsForbiddenWord(text) {
       if (!text) return false;
-      const lower = text.toLowerCase();
-      return forbiddenWords.some(word => lower.includes(word));
+      const normText = normalizeText(text);
+      return forbiddenWords.some(word => normText.includes(word));
     }
 
     function getGradeByAge(age) {
@@ -100,6 +185,28 @@
       return "";
     }
 
+    function updateLanguage(lang) {
+      const texts = textContent[lang];
+      document.getElementById("formTitle").textContent = texts.title;
+
+      document.getElementById("full_name").placeholder = texts.placeholders.full_name;
+      document.getElementById("age").placeholder = texts.placeholders.age;
+      document.getElementById("class").placeholder = texts.placeholders.class;
+      document.getElementById("nickname").placeholder = texts.placeholders.nickname;
+
+      document.getElementById("submitBtn").value = texts.submit;
+
+      // Clear messages on language switch
+      msg.textContent = "";
+    }
+
+    langSelect.addEventListener("change", () => {
+      updateLanguage(langSelect.value);
+    });
+
+    // Initialize with default language
+    updateLanguage(langSelect.value);
+
     ageInput.addEventListener("input", () => {
       const age = parseInt(ageInput.value);
       if (isNaN(age)) {
@@ -108,7 +215,8 @@
         return;
       }
       if (age < 12) {
-        msg.textContent = "❌ Age must be 12 or older.";
+        msg.style.color = "#ff5555";
+        msg.textContent = textContent[langSelect.value].messages.ageUnder12;
         classInput.value = "";
       } else {
         msg.textContent = "";
@@ -131,17 +239,18 @@
 
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
+      const lang = langSelect.value;
       msg.style.color = "#ff5555";
 
       const age = parseInt(ageInput.value);
       if (isNaN(age) || age < 12) {
-        msg.textContent = "❌ Age must be 12 or older.";
+        msg.textContent = textContent[lang].messages.ageUnder12;
         return;
       }
 
       const grade = getGradeByAge(age);
       if (!classInput.value || !classInput.value.startsWith(grade)) {
-        msg.textContent = `❌ Class should start with grade ${grade} based on your age.`;
+        msg.textContent = textContent[lang].messages.classMismatch(grade);
         return;
       }
 
@@ -149,12 +258,12 @@
       const inputs = form.querySelectorAll("input[type='text'], input[type='number']");
       for (const input of inputs) {
         if (containsForbiddenWord(input.value)) {
-          msg.textContent = "❌ Your input contains forbidden words.";
+          msg.textContent = textContent[lang].messages.forbidden;
           return;
         }
       }
 
-      msg.textContent = "Submitting...";
+      msg.textContent = textContent[lang].messages.submitting;
       msg.style.color = "#fff";
 
       const formData = new FormData(form);
@@ -173,14 +282,14 @@
 
         if (response.ok) {
           msg.style.color = "#43b581";
-          msg.textContent = "✅ Submitted successfully!";
+          msg.textContent = textContent[lang].messages.success;
           form.reset();
           classInput.value = "";
         } else {
-          msg.textContent = "❌ Something went wrong.";
+          msg.textContent = textContent[lang].messages.error;
         }
       } catch (error) {
-        msg.textContent = "❌ Network error.";
+        msg.textContent = textContent[lang].messages.networkError;
       }
     });
   </script>
