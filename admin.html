@@ -133,6 +133,18 @@
         <input type="text" id="discord-link-input" class="w-full" value="https://discord.gg/your-discord-invite">
         <button id="save-discord-link" class="btn-minecraft mt-2">Save Discord Link</button>
       </div>
+      <h3 class="text-xl mt-4 mb-2">Manage Users</h3>
+      <table class="w-full text-left" id="users-table">
+        <thead>
+          <tr>
+            <th class="p-2">Username</th>
+            <th class="p-2">Email</th>
+            <th class="p-2">Grade</th>
+            <th class="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body"></tbody>
+      </table>
     </div>
   </div>
 
@@ -149,6 +161,8 @@
     const navLogout = document.getElementById('nav-logout');
     const registrationsTable = document.getElementById('registrations-table');
     const adminsList = document.getElementById('admins-list');
+    const usersTable = document.getElementById('users-table');
+    const usersTableBody = document.getElementById('users-table-body');
     const serverIpInput = document.getElementById('server-ip-input');
     const saveServerIp = document.getElementById('save-server-ip');
     const discordLinkInput = document.getElementById('discord-link-input');
@@ -209,6 +223,50 @@
       });
     }
 
+    // Render Users for Admin Management
+    function renderUsers() {
+      usersTableBody.innerHTML = '';
+      registrations.forEach((reg, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="p-2">${reg.username}</td>
+          <td class="p-2">${reg.email}</td>
+          <td class="p-2">${reg.grade || 'N/A'}</td>
+          <td class="p-2">
+            <button class="btn-minecraft text-sm mr-2" onclick="editUser(${index})">Edit</button>
+            <button class="btn-minecraft btn-offline text-sm" onclick="deleteUser(${index})">Delete</button>
+          </td>
+        `;
+        usersTableBody.appendChild(row);
+      });
+    }
+
+    // Edit User (Admin)
+    window.editUser = (index) => {
+      const reg = registrations[index];
+      const newUsername = prompt('New Username:', reg.username);
+      const newEmail = prompt('New Email:', reg.email);
+      const newGrade = prompt('New Grade:', reg.grade || '');
+      const newPassword = prompt('New Password:', reg.password);
+      if (newUsername) reg.username = newUsername;
+      if (newEmail) reg.email = newEmail;
+      if (newGrade) reg.grade = newGrade;
+      if (newPassword) reg.password = newPassword;
+      localStorage.setItem('registrations', JSON.stringify(registrations));
+      renderUsers();
+      renderRegistrations();
+    };
+
+    // Delete User (Admin)
+    window.deleteUser = (index) => {
+      if (confirm('Are you sure you want to delete this account?')) {
+        registrations.splice(index, 1);
+        localStorage.setItem('registrations', JSON.stringify(registrations));
+        renderUsers();
+        renderRegistrations();
+      }
+    };
+
     // Save Server IP
     saveServerIp.addEventListener('click', () => {
       const newIp = serverIpInput.value.trim();
@@ -234,6 +292,7 @@
     // Initial setup
     renderRegistrations();
     renderAdmins();
+    renderUsers();
     serverIpInput.value = serverIp;
     discordLinkInput.value = discordLink;
 
