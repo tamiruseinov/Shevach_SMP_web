@@ -145,6 +145,8 @@
         </thead>
         <tbody id="users-table-body"></tbody>
       </table>
+      <button id="sync-to-sheetdb" class="btn-minecraft mt-2">Sync to SheetDB</button>
+      <button id="save-to-json" class="btn-minecraft mt-2">Save to profile.json</button>
     </div>
   </div>
 
@@ -167,6 +169,8 @@
     const saveServerIp = document.getElementById('save-server-ip');
     const discordLinkInput = document.getElementById('discord-link-input');
     const saveDiscordLink = document.getElementById('save-discord-link');
+    const syncToSheetDB = document.getElementById('sync-to-sheetdb');
+    const saveToJson = document.getElementById('save-to-json');
 
     // Check admin status
     if (!admins.includes(currentUser)) {
@@ -210,6 +214,8 @@
     window.updateStatus = (index, status) => {
       registrations[index].status = status;
       localStorage.setItem('registrations', JSON.stringify(registrations));
+      saveToProfileJson();
+      sendToSheetDB();
       renderRegistrations();
     };
 
@@ -253,6 +259,8 @@
       if (newGrade) reg.grade = newGrade;
       if (newPassword) reg.password = newPassword;
       localStorage.setItem('registrations', JSON.stringify(registrations));
+      saveToProfileJson();
+      sendToSheetDB();
       renderUsers();
       renderRegistrations();
     };
@@ -262,6 +270,8 @@
       if (confirm('Are you sure you want to delete this account?')) {
         registrations.splice(index, 1);
         localStorage.setItem('registrations', JSON.stringify(registrations));
+        saveToProfileJson();
+        sendToSheetDB();
         renderUsers();
         renderRegistrations();
       }
@@ -289,18 +299,58 @@
       }
     });
 
+    // Save to profile.json
+    async function saveToProfileJson() {
+      const blob = new Blob([JSON.stringify(registrations, null, 2)], { type: 'application/json' });
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'profile.json',
+          types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        alert('Profile data saved to profile.json');
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.error('File System Access API not supported, falling back to localStorage');
+          localStorage.setItem('profileBackup', JSON.stringify(registrations));
+          alert('Saved to localStorage backup');
+        }
+      }
+    }
+
+    // Send to SheetDB
+    function sendToSheetDB() {
+      registrations.forEach(user => {
+        const formData = new FormData();
+        formData.append('data[nickname]', user.username);
+        formData.append('data[grade]', user.grade || '');
+        formData.append('data[email]', user.email);
+        formData.append('data[password]', user.password);
+
+        fetch('https://sheetdb.io/api/v1/bqauqq803k7zo', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.created === 1) {
+            console.log('Success:', data);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    }
+
+    // Event listeners for buttons
+    saveToJson.addEventListener('click', saveToProfileJson);
+    syncToSheetDB.addEventListener('click', sendToSheetDB);
+
     // Initial setup
     renderRegistrations();
     renderAdmins();
     renderUsers();
     serverIpInput.value = serverIp;
     discordLinkInput.value = discordLink;
-
-    // Logout
-    navLogout.addEventListener('click', (e) => {
-      e.preventDefault();
-      currentUser = null;
-      localStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
-    });
   </script>
