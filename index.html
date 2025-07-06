@@ -102,6 +102,7 @@
       <a href="#" id="nav-home" class="nav-btn">Home</a>
       <a href="#" id="nav-register" class="nav-btn">Register</a>
       <a href="#" id="nav-login" class="nav-btn">Login</a>
+      <a href="#" id="nav-profile" class="nav-btn" style="display: none;">Profile</a>
       <a href="#" id="nav-logout" class="nav-btn" style="display: none;">Logout</a>
     </div>
   </div>
@@ -180,7 +181,7 @@
     <div class="card">
       <h2 class="text-xl mb-2">Server Status</h2>
       <p><strong>Status:</strong> <span id="server-status" class="btn-offline">Offline</span></p>
-      <p><strong>Players:</strong> 0/100</p>
+      <p><strong>Players:</strong> <span id="player-count">0/100</span></p>
     </div>
     <div class="card">
       <h2 class="text-xl mb-2">Discord</h2>
@@ -220,10 +221,13 @@
     const navHome = document.getElementById('nav-home');
     const navRegister = document.getElementById('nav-register');
     const navLogin = document.getElementById('nav-login');
+    const navProfile = document.getElementById('nav-profile');
     const navLogout = document.getElementById('nav-logout');
     const showLoginLink = document.getElementById('show-login-link');
     const showRegisterLink = document.getElementById('show-register-link');
     const serverIpSpan = document.getElementById('server-ip');
+    const serverStatus = document.getElementById('server-status');
+    const playerCount = document.getElementById('player-count');
     const discordLinkAnchor = document.getElementById('discord-link');
 
     // Update displayed values
@@ -238,6 +242,7 @@
       welcomeMsg.style.display = currentUser ? 'block' : 'none';
       welcomeTitle.style.display = currentUser ? 'none' : 'block';
       navLogout.style.display = currentUser ? 'inline' : 'none';
+      navProfile.style.display = currentUser ? 'inline' : 'none';
       if (currentUser && admins.includes(currentUser)) {
         window.location.href = 'admin.html';
       }
@@ -264,6 +269,11 @@
     navLogin.addEventListener('click', (e) => {
       e.preventDefault();
       showSection(loginSection);
+    });
+
+    navProfile.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'profile.html';
     });
 
     navLogout.addEventListener('click', (e) => {
@@ -320,4 +330,15 @@
       showSection(homepage);
       loginForm.reset();
     });
+
+    // Simulate Minecraft server status
+    function checkServerStatus() {
+      const status = Math.random() > 0.3 ? 'Online' : 'Offline'; // 70% chance online
+      const players = status === 'Online' ? Math.floor(Math.random() * 100) : 0;
+      serverStatus.textContent = status;
+      serverStatus.className = status === 'Online' ? 'btn-minecraft' : 'btn-offline';
+      playerCount.textContent = `${players}/100`;
+      setTimeout(checkServerStatus, 5000); // Check every 5 seconds
+    }
+    checkServerStatus();
   </script>
