@@ -127,6 +127,10 @@
           <input type="email" id="email" class="w-full" required>
         </div>
         <div class="mb-4">
+          <label class="block mb-2">Password</label>
+          <input type="password" id="password" class="w-full" required>
+        </div>
+        <div class="mb-4">
           <label class="block mb-2">Grade/Class (Optional)</label>
           <input type="text" id="grade" class="w-full">
         </div>
@@ -146,6 +150,10 @@
         <div class="mb-4">
           <label class="block mb-2">Email Address</label>
           <input type="email" id="login-email" class="w-full" required>
+        </div>
+        <div class="mb-4">
+          <label class="block mb-2">Password</label>
+          <input type="password" id="login-password" class="w-full" required>
         </div>
         <button type="submit" class="btn-minecraft w-full">Log In</button>
       </form>
@@ -281,12 +289,13 @@
       e.preventDefault();
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
       const grade = document.getElementById('grade').value;
       if (registrations.find(r => r.email === email)) {
         alert('Email already registered!');
         return;
       }
-      registrations.push({ username, email, grade, status: 'Pending' });
+      registrations.push({ username, email, password, grade, status: 'Pending' });
       localStorage.setItem('registrations', JSON.stringify(registrations));
       currentUser = email;
       localStorage.setItem('currentUser', email);
@@ -299,14 +308,15 @@
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
-      if (!registrations.find(r => r.email === email)) {
-        alert('Email not registered!');
+      const password = document.getElementById('login-password').value;
+      const user = registrations.find(r => r.email === email && r.password === password);
+      if (!user) {
+        alert('Invalid email or password!');
         return;
       }
       currentUser = email;
       localStorage.setItem('currentUser', email);
-      const user = registrations.find(r => r.email === email);
-      welcomeUsername.textContent = user ? user.username : 'Player';
+      welcomeUsername.textContent = user.username || 'Player';
       showSection(homepage);
       loginForm.reset();
     });
