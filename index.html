@@ -177,7 +177,7 @@
     <div class="card">
       <h2 class="text-xl mb-2">Discord</h2>
       <p>Connect with other players, get updates, and chat with the community!</p>
-      <a href="https://discord.gg/your-discord-invite" target="_blank" class="btn-minecraft mt-2 block w-full text-center">Join Discord Server</a>
+      <a href="#" id="discord-link" target="_blank" class="btn-minecraft mt-2 block w-full text-center">Join Discord Server</a>
     </div>
     <div class="card">
       <h2 class="text-xl mb-2">Server Rules</h2>
@@ -197,6 +197,8 @@
     let registrations = JSON.parse(localStorage.getItem('registrations')) || [];
     let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
     let currentUser = localStorage.getItem('currentUser') || null;
+    let serverIp = localStorage.getItem('serverIp') || 'mode-pichunter-joimc.link';
+    let discordLink = localStorage.getItem('discordLink') || 'https://discord.gg/your-discord-invite';
 
     // DOM elements
     const regForm = document.getElementById('reg-form');
@@ -213,6 +215,13 @@
     const navLogout = document.getElementById('nav-logout');
     const showLoginLink = document.getElementById('show-login-link');
     const showRegisterLink = document.getElementById('show-register-link');
+    const serverIpSpan = document.getElementById('server-ip');
+    const discordLinkAnchor = document.getElementById('discord-link');
+
+    // Update displayed values
+    serverIpSpan.textContent = serverIp;
+    discordLinkAnchor.href = discordLink;
+    discordLinkAnchor.textContent = `Join ${discordLink.split('/').pop()} Server`;
 
     // Navigation and section handling
     function showSection(section) {
