@@ -91,7 +91,7 @@
       <h1 class="text-2xl">MineSchool Admin</h1>
     </div>
     <div>
-      <a href="index.html" class="nav-btn">Back to Home</a>
+      <a href="index.html" class="nav-btn">Home</a>
       <a href="#" id="nav-logout" class="nav-btn">Logout</a>
     </div>
   </div>
@@ -122,6 +122,17 @@
       </form>
       <h3 class="text-xl mt-4 mb-2">Current Admins</h3>
       <ul id="admins-list" class="list-disc list-inside"></ul>
+      <h3 class="text-xl mt-4 mb-2">Update Server Details</h3>
+      <div class="mb-4">
+        <label class="block mb-2">Server IP</label>
+        <input type="text" id="server-ip-input" class="w-full" value="mode-pichunter-joimc.link">
+        <button id="save-server-ip" class="btn-minecraft mt-2">Save IP</button>
+      </div>
+      <div class="mb-4">
+        <label class="block mb-2">Discord Link</label>
+        <input type="text" id="discord-link-input" class="w-full" value="https://discord.gg/your-discord-invite">
+        <button id="save-discord-link" class="btn-minecraft mt-2">Save Discord Link</button>
+      </div>
     </div>
   </div>
 
@@ -130,12 +141,18 @@
     let registrations = JSON.parse(localStorage.getItem('registrations')) || [];
     let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
     let currentUser = localStorage.getItem('currentUser') || null;
+    let serverIp = localStorage.getItem('serverIp') || 'mode-pichunter-joimc.link';
+    let discordLink = localStorage.getItem('discordLink') || 'https://discord.gg/your-discord-invite';
 
     // DOM elements
     const addAdminForm = document.getElementById('add-admin-form');
     const navLogout = document.getElementById('nav-logout');
     const registrationsTable = document.getElementById('registrations-table');
     const adminsList = document.getElementById('admins-list');
+    const serverIpInput = document.getElementById('server-ip-input');
+    const saveServerIp = document.getElementById('save-server-ip');
+    const discordLinkInput = document.getElementById('discord-link-input');
+    const saveDiscordLink = document.getElementById('save-discord-link');
 
     // Check admin status
     if (!admins.includes(currentUser)) {
@@ -192,9 +209,33 @@
       });
     }
 
+    // Save Server IP
+    saveServerIp.addEventListener('click', () => {
+      const newIp = serverIpInput.value.trim();
+      if (newIp) {
+        serverIp = newIp;
+        localStorage.setItem('serverIp', serverIp);
+        alert('Server IP updated!');
+      }
+    });
+
+    // Save Discord Link
+    saveDiscordLink.addEventListener('click', () => {
+      const newLink = discordLinkInput.value.trim();
+      if (newLink && newLink.startsWith('https://')) {
+        discordLink = newLink;
+        localStorage.setItem('discordLink', discordLink);
+        alert('Discord link updated!');
+      } else {
+        alert('Please enter a valid HTTPS Discord link!');
+      }
+    });
+
     // Initial setup
     renderRegistrations();
     renderAdmins();
+    serverIpInput.value = serverIp;
+    discordLinkInput.value = discordLink;
 
     // Logout
     navLogout.addEventListener('click', (e) => {
