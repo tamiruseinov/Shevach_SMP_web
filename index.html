@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title data-lang="title">Join the Minecraft Server</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="lang-switcher">
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+      <option value="he">עברית</option>
+    </select>
+  </div>
+  <div class="form-container">
+    <h2 data-lang="heading">Join Our MC Server</h2>
+    <form id="mcForm">
+      <input type="text" name="full_name" data-lang-placeholder="full_name" required />
+      <input type="number" name="age" data-lang-placeholder="age" required />
+      <input type="text" name="nickname" data-lang-placeholder="nickname" required />
+      <input type="text" name="class" data-lang-placeholder="class" readonly />
+      <input type="submit" data-lang-value="submit" />
+      <div class="message" id="formMessage"></div>
+    </form>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

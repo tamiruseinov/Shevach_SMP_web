@@ -1,0 +1,47 @@
+{
+  "en": {
+    "title": "Join the Minecraft Server",
+    "heading": "Join Our MC Server",
+    "full_name": "Full Name",
+    "age": "Age",
+    "nickname": "Minecraft Nickname",
+    "class": "Class",
+    "submit": "Submit",
+    "too_young": "You must be at least 12 years old.",
+    "bad_words": "Offensive words are not allowed.",
+    "error": "Something went wrong.",
+    "thanks_title": "Thank You",
+    "thanks_message": "✅ Submitted successfully!",
+    "back": "Back to Form"
+  },
+  "ru": {
+    "title": "Присоединиться к серверу Minecraft",
+    "heading": "Вход на наш сервер MC",
+    "full_name": "Полное имя",
+    "age": "Возраст",
+    "nickname": "Ник Minecraft",
+    "class": "Класс",
+    "submit": "Отправить",
+    "too_young": "Вам должно быть не менее 12 лет.",
+    "bad_words": "Оскорбительные слова запрещены.",
+    "error": "Что-то пошло не так.",
+    "thanks_title": "Спасибо",
+    "thanks_message": "✅ Успешно отправлено!",
+    "back": "Назад к форме"
+  },
+  "he": {
+    "title": "הצטרף לשרת מיינקראפט",
+    "heading": "הצטרף לשרת שלנו",
+    "full_name": "שם מלא",
+    "age": "גיל",
+    "nickname": "כינוי במיינקראפט",
+    "class": "כיתה",
+    "submit": "שלח",
+    "too_young": "אתה חייב להיות בן 12 לפחות.",
+    "bad_words": "מילים פוגעניות אינן מותרות.",
+    "error": "משהו השתבש.",
+    "thanks_title": "תודה",
+    "thanks_message": "✅ נשלח בהצלחה!",
+    "back": "חזרה לטופס"
+  }
+}
