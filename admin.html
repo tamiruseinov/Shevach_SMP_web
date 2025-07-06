@@ -1,27 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Admin Panel</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineSchool Admin</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Admin Panel</h1>
-    <p>Approve or reject new registrations here.</p>
-    <div id="requests">Loading...</div>
+  <div class="header flex justify-between items-center">
+    <div class="flex items-center">
+      <span class="text-2xl bg-green-700 p-1 mr-2">□</span>
+      <h1 class="text-2xl">MineSchool Admin</h1>
+    </div>
+    <div>
+      <a href="index.html" class="nav-btn">Back to Home</a>
+      <a href="#" id="nav-logout" class="nav-btn">Logout</a>
+    </div>
   </div>
+
+  <div class="max-w-4xl mx-auto mt-4">
+    <div class="card">
+      <h2 class="text-2xl mb-4">Admin Panel</h2>
+      <h3 class="text-xl mb-2">Manage Registrations</h3>
+      <table class="w-full text-left">
+        <thead>
+          <tr>
+            <th class="p-2">Username</th>
+            <th class="p-2">Email</th>
+            <th class="p-2">Grade</th>
+            <th class="p-2">Status</th>
+            <th class="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="registrations-table"></tbody>
+      </table>
+      <h3 class="text-xl mt-4 mb-2">Add Admin</h3>
+      <form id="add-admin-form">
+        <div class="mb-4">
+          <label class="block mb-2">Admin Email</label>
+          <input type="email" id="admin-email" class="w-full" required>
+        </div>
+        <button type="submit" class="btn-minecraft">Add Admin</button>
+      </form>
+      <h3 class="text-xl mt-4 mb-2">Current Admins</h3>
+      <ul id="admins-list" class="list-disc list-inside"></ul>
+    </div>
+  </div>
+
   <script>
-    // Fake data for demo
-    const users = [
-    ];
-    const container = document.getElementById("requests");
-    container.innerHTML = "";
-    users.forEach(u => {
-      const div = document.createElement("div");
-      div.innerHTML = `<strong>${u.username}</strong> (${u.email}) — ${u.class} <button>✅</button> <button>❌</button>`;
-      container.appendChild(div);
+    // Simulated backend data
+    let registrations = JSON.parse(localStorage.getItem('registrations')) || [];
+    let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
+    let currentUser = localStorage.getItem('currentUser') || null;
+
+    // DOM elements
+    const addAdminForm = document.getElementById('add-admin-form');
+    const navLogout = document.getElementById('nav-logout');
+    const registrationsTable = document.getElementById('registrations-table');
+    const adminsList = document.getElementById('admins-list');
+
+    // Check admin status
+    if (!admins.includes(currentUser)) {
+      window.location.href = 'index.html';
+    }
+
+    // Add Admin
+    addAdminForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const adminEmail = document.getElementById('admin-email').value;
+      if (!admins.includes(adminEmail)) {
+        admins.push(adminEmail);
+        localStorage.setItem('admins', JSON.stringify(admins));
+        renderAdmins();
+        addAdminForm.reset();
+      } else {
+        alert('This email is already an admin.');
+      }
+    });
+
+    // Render Registrations
+    function renderRegistrations() {
+      registrationsTable.innerHTML = '';
+      registrations.forEach((reg, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="p-2">${reg.username}</td>
+          <td class="p-2">${reg.email}</td>
+          <td class="p-2">${reg.grade || 'N/A'}</td>
+          <td class="p-2">${reg.status}</td>
+          <td class="p-2">
+            <button class="btn-minecraft text-sm mr-2" onclick="updateStatus(${index}, 'Approved')">Approve</button>
+            <button class="btn-minecraft btn-offline text-sm" onclick="updateStatus(${index}, 'Rejected')">Reject</button>
+          </td>
+        `;
+        registrationsTable.appendChild(row);
+      });
+    }
+
+    // Update Registration Status
+    window.updateStatus = (index, status) => {
+      registrations[index].status = status;
+      localStorage.setItem('registrations', JSON.stringify(registrations));
+      renderRegistrations();
+    };
+
+    // Render Admins
+    function renderAdmins() {
+      adminsList.innerHTML = '';
+      admins.forEach(email => {
+        const li = document.createElement('li');
+        li.textContent = email;
+        adminsList.appendChild(li);
+      });
+    }
+
+    // Initial setup
+    renderRegistrations();
+    renderAdmins();
+
+    // Logout
+    navLogout.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
     });
   </script>
-</body>
-</html>
