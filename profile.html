@@ -152,6 +152,8 @@
       if (nickname && confirm('Are you sure you want to update your nickname?')) {
         user.username = nickname;
         localStorage.setItem('registrations', JSON.stringify(registrations));
+        saveToProfileJson();
+        sendToSheetDB();
         profileUsername.textContent = nickname;
         newNickname.value = '';
         alert('Nickname updated!');
@@ -170,6 +172,8 @@
         localStorage.setItem('registrations', JSON.stringify(registrations));
         currentUser = email;
         localStorage.setItem('currentUser', email);
+        saveToProfileJson();
+        sendToSheetDB();
         profileEmail.textContent = email;
         newEmail.value = '';
         alert('Email updated!');
@@ -182,6 +186,8 @@
       if (grade && confirm('Are you sure you want to update your grade?')) {
         user.grade = grade;
         localStorage.setItem('registrations', JSON.stringify(registrations));
+        saveToProfileJson();
+        sendToSheetDB();
         profileGrade.textContent = grade;
         newGrade.value = '';
         alert('Grade updated!');
@@ -195,6 +201,8 @@
       if (currentPass && newPass && user.password === currentPass && confirm('Are you sure you want to change your password?')) {
         user.password = newPass;
         localStorage.setItem('registrations', JSON.stringify(registrations));
+        saveToProfileJson();
+        sendToSheetDB();
         currentPassword.value = '';
         newPassword.value = '';
         alert('Password updated!');
@@ -208,11 +216,57 @@
       if (confirm('Are you sure you want to delete your account? This action cannot be undone!')) {
         registrations = registrations.filter(r => r.email !== currentUser);
         localStorage.setItem('registrations', JSON.stringify(registrations));
+        saveToProfileJson();
+        sendToSheetDB();
         currentUser = null;
         localStorage.removeItem('currentUser');
         window.location.href = 'index.html';
       }
     });
+
+    // Save to profile.json
+    async function saveToProfileJson() {
+      const blob = new Blob([JSON.stringify(registrations, null, 2)], { type: 'application/json' });
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'profile.json',
+          types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        alert('Profile data saved to profile.json');
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.error('File System Access API not supported, falling back to localStorage');
+          localStorage.setItem('profileBackup', JSON.stringify(registrations));
+          alert('Saved to localStorage backup');
+        }
+      }
+    }
+
+    // Send to SheetDB
+    function sendToSheetDB() {
+      registrations.forEach(user => {
+        const formData = new FormData();
+        formData.append('data[nickname]', user.username);
+        formData.append('data[grade]', user.grade || '');
+        formData.append('data[email]', user.email);
+        formData.append('data[password]', user.password);
+
+        fetch('https://sheetdb.io/api/v1/bqauqq803k7zo', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.created === 1) {
+            console.log('Success:', data);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    }
 
     // Logout
     navLogout.addEventListener('click', (e) => {
