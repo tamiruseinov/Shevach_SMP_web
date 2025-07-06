@@ -1,20 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Shevach SMP – Home</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineSchool</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome to Shevach SMP!</h1>
-    <p><strong>Server IP:</strong> play.shevachsmp.edu</p>
-    <p><strong>How to Join:</strong> Use Minecraft Java 1.21.5</p>
-    <p><strong>Rules:</strong> No griefing · No hacks · Respect others</p>
-    <p><strong>Discord:</strong> <a href="https://discord.gg/NFgEE8gvGd" target="_blank">Join here</a></p>
-    <div id="status">Checking server status...</div>
-    <a href="register.html" class="button">Register Now</a>
+  <div class="header flex justify-between items-center">
+    <div class="flex items-center">
+      <span class="text-2xl bg-green-700 p-1 mr-2">□</span>
+      <h1 class="text-2xl">MineSchool</h1>
+    </div>
+    <div>
+      <a href="index.html" id="nav-home" class="nav-btn">Home</a>
+      <a href="index.html?section=register" id="nav-register" class="nav-btn">Register</a>
+      <a href="index.html?section=login" id="nav-login" class="nav-btn">Login</a>
+      <a href="#" id="nav-logout" class="nav-btn">Logout</a>
+    </div>
   </div>
-  <script src="server-status.js"></script>
-</body>
-</html>
+
+  <!-- Welcome Message -->
+  <div class="text-center mt-4">
+    <h2 id="welcome-msg" class="text-3xl text-green-400 hidden">Welcome back, <span id="welcome-username">Player</span>!</h2>
+    <h2 class="text-4xl text-green-400">Welcome to MineSchool</h2>
+    <p class="mt-2">Join our educational Minecraft server where learning meets creativity. Build, explore, and learn together in a safe, supervised environment.</p>
+  </div>
+
+  <!-- Registration Form -->
+  <div id="registration-form" class="section max-w-md mx-auto mt-4">
+    <div class="card">
+      <h2 class="text-2xl mb-4">Register</h2>
+      <form id="reg-form">
+        <div class="mb-4">
+          <label class="block mb-2">Minecraft Username</label>
+          <input type="text" id="username" class="w-full" required>
+        </div>
+        <div class="mb-4">
+          <label class="block mb-2">Email Address</label>
+          <input type="email" id="email" class="w-full" required>
+        </div>
+        <div class="mb-4">
+          <label class="block mb-2">Grade/Class (Optional)</label>
+          <input type="text" id="grade" class="w-full">
+        </div>
+        <button type="submit" class="btn-minecraft w-full">Register</button>
+      </form>
+      <p class="mt-4 text-center">
+        Already registered? <a href="index.html?section=login" class="hover:underline">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Login Page -->
+  <div id="login-form" class="section max-w-md mx-auto mt-4">
+    <div class="card">
+      <h2 class="text-2xl mb-4">Login</h2>
+      <form id="login-submit">
+        <div class="mb-4">
+          <label class="block mb-2">Email Address</label>
+          <input type="email" id="login-email" class="w-full" required>
+        </div>
+        <button type="submit" class="btn-minecraft w-full">Log In</button>
+      </form>
+      <p class="mt-4 text-center">
+        Need to register? <a href="index.html?section=register" class="hover:underline">Register</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Homepage Content -->
+  <div id="homepage" class="section max-w-4xl mx-auto mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card">
+      <h2 class="text-xl mb-2">Server Connection</h2>
+      <p><strong>Server IP:</strong> <span id="server-ip">mode-pichunter-joimc.link</span></p>
+      <h3 class="text-lg mt-2">How to Connect:</h3>
+      <ol class="list-decimal list-inside">
+        <li>Open Minecraft Java edition</li>
+        <li>Click "Multiplayer"</li>
+        <li>Click "Add Server"</li>
+        <li>Enter the server IP above</li>
+        <li>Click "Done" and join</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2 class="text-xl mb-2">Server Status</h2>
+      <p><strong>Status:</strong> <span id="server-status" class="btn-offline">Offline</span></p>
+      <p><strong>Players:</strong> 0/100</p>
+    </div>
+    <div class="card">
+      <h2 class="text-xl mb-2">Discord</h2>
+      <p>Connect with other players, get updates, and chat with the community!</p>
+      <a href="https://discord.gg/your-discord-invite" target="_blank" class="btn-minecraft mt-2 block w-full text-center">Join Discord Server</a>
+    </div>
+    <div class="card">
+      <h2 class="text-xl mb-2">Server Rules</h2>
+      <ol class="list-decimal list-inside">
+        <li>No griefing or destroying others' builds</li>
+        <li>Be respectful to all players and staff</li>
+        <li>No inappropriate language or content</li>
+        <li>Follow your teacher's instructions</li>
+        <li>Report any issues to staff immediately</li>
+        <li>Have fun and be creative!</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Simulated backend data
+    let registrations = JSON.parse(localStorage.getItem('registrations')) || [];
+    let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
+    let currentUser = null;
+
+    // DOM elements
+    const regForm = document.getElementById('reg-form');
+    const loginForm = document.getElementById('login-submit');
+    const registrationSection = document.getElementById('registration-form');
+    const loginSection = document.getElementById('login-form');
+    const homepage = document.getElementById('homepage');
+    const welcomeMsg = document.getElementById('welcome-msg');
+    const welcomeUsername = document.getElementById('welcome-username');
+    const navHome = document.getElementById('nav-home');
+    const navRegister = document.getElementById('nav-register');
+    const navLogin = document.getElementById('nav-login');
+    const navLogout = document.getElementById('nav-logout');
+
+    // Navigation and section handling
+    function showSection(section) {
+      [registrationSection, loginSection, homepage].forEach(s => s.classList.remove('active'));
+      const urlParams = new URLSearchParams(window.location.search);
+      const sectionParam = urlParams.get('section');
+      if (sectionParam === 'register') {
+        registrationSection.classList.add('active');
+      } else if (sectionParam === 'login') {
+        loginSection.classList.add('active');
+      } else {
+        homepage.classList.add('active');
+      }
+      welcomeMsg.classList.toggle('hidden', !currentUser);
+      if (admins.includes(currentUser)) {
+        window.location.href = 'admin.html';
+      }
+    }
+
+    navHome.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+
+    navRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html?section=register';
+    });
+
+    navLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html?section=login';
+    });
+
+    navLogout.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentUser = null;
+      welcomeMsg.classList.add('hidden');
+      window.location.href = 'index.html';
+    });
+
+    // Registration
+    regForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const grade = document.getElementById('grade').value;
+      registrations.push({ username, email, grade, status: 'Pending' });
+      localStorage.setItem('registrations', JSON.stringify(registrations));
+      currentUser = email;
+      welcomeUsername.textContent = username || 'Player';
+      welcomeMsg.classList.remove('hidden');
+      window.location.href = 'index.html';
+      regForm.reset();
+    });
+
+    // Login
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      currentUser = email;
+      const user = registrations.find(r => r.email === email);
+      welcomeUsername.textContent = user ? user.username : 'Player';
+      welcomeMsg.classList.remove('hidden');
+      window.location.href = 'index.html';
+      loginForm.reset();
+    });
+
+    // Initial setup
+    showSection();
+  </script>
