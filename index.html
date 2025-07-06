@@ -13,22 +13,22 @@
       <h1 class="text-2xl">MineSchool</h1>
     </div>
     <div>
-      <a href="index.html" id="nav-home" class="nav-btn">Home</a>
-      <a href="index.html?section=register" id="nav-register" class="nav-btn">Register</a>
-      <a href="index.html?section=login" id="nav-login" class="nav-btn">Login</a>
-      <a href="#" id="nav-logout" class="nav-btn">Logout</a>
+      <a href="#" id="nav-home" class="nav-btn">Home</a>
+      <a href="#" id="nav-register" class="nav-btn">Register</a>
+      <a href="#" id="nav-login" class="nav-btn">Login</a>
+      <a href="#" id="nav-logout" class="nav-btn" style="display: none;">Logout</a>
     </div>
   </div>
 
   <!-- Welcome Message -->
   <div class="text-center mt-4">
     <h2 id="welcome-msg" class="text-3xl text-green-400 hidden">Welcome back, <span id="welcome-username">Player</span>!</h2>
-    <h2 class="text-4xl text-green-400">Welcome to MineSchool</h2>
+    <h2 id="welcome-title" class="text-4xl text-green-400">Welcome to MineSchool</h2>
     <p class="mt-2">Join our educational Minecraft server where learning meets creativity. Build, explore, and learn together in a safe, supervised environment.</p>
   </div>
 
   <!-- Registration Form -->
-  <div id="registration-form" class="section max-w-md mx-auto mt-4">
+  <div id="registration-form" class="section max-w-md mx-auto mt-4" style="display: none;">
     <div class="card">
       <h2 class="text-2xl mb-4">Register</h2>
       <form id="reg-form">
@@ -47,13 +47,13 @@
         <button type="submit" class="btn-minecraft w-full">Register</button>
       </form>
       <p class="mt-4 text-center">
-        Already registered? <a href="index.html?section=login" class="hover:underline">Log in</a>
+        Already registered? <a href="#" id="show-login-link" class="hover:underline">Log in</a>
       </p>
     </div>
   </div>
 
   <!-- Login Page -->
-  <div id="login-form" class="section max-w-md mx-auto mt-4">
+  <div id="login-form" class="section max-w-md mx-auto mt-4" style="display: none;">
     <div class="card">
       <h2 class="text-2xl mb-4">Login</h2>
       <form id="login-submit">
@@ -64,7 +64,7 @@
         <button type="submit" class="btn-minecraft w-full">Log In</button>
       </form>
       <p class="mt-4 text-center">
-        Need to register? <a href="index.html?section=register" class="hover:underline">Register</a>
+        Need to register? <a href="#" id="show-register-link" class="hover:underline">Register</a>
       </p>
     </div>
   </div>
@@ -110,7 +110,7 @@
     // Simulated backend data
     let registrations = JSON.parse(localStorage.getItem('registrations')) || [];
     let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
-    let currentUser = null;
+    let currentUser = localStorage.getItem('currentUser') || null;
 
     // DOM elements
     const regForm = document.getElementById('reg-form');
@@ -119,50 +119,66 @@
     const loginSection = document.getElementById('login-form');
     const homepage = document.getElementById('homepage');
     const welcomeMsg = document.getElementById('welcome-msg');
+    const welcomeTitle = document.getElementById('welcome-title');
     const welcomeUsername = document.getElementById('welcome-username');
     const navHome = document.getElementById('nav-home');
     const navRegister = document.getElementById('nav-register');
     const navLogin = document.getElementById('nav-login');
     const navLogout = document.getElementById('nav-logout');
+    const showLoginLink = document.getElementById('show-login-link');
+    const showRegisterLink = document.getElementById('show-register-link');
 
     // Navigation and section handling
     function showSection(section) {
-      [registrationSection, loginSection, homepage].forEach(s => s.classList.remove('active'));
-      const urlParams = new URLSearchParams(window.location.search);
-      const sectionParam = urlParams.get('section');
-      if (sectionParam === 'register') {
-        registrationSection.classList.add('active');
-      } else if (sectionParam === 'login') {
-        loginSection.classList.add('active');
-      } else {
-        homepage.classList.add('active');
-      }
-      welcomeMsg.classList.toggle('hidden', !currentUser);
-      if (admins.includes(currentUser)) {
+      [registrationSection, loginSection, homepage].forEach(s => s.style.display = 'none');
+      if (section) section.style.display = 'block';
+      welcomeMsg.style.display = currentUser ? 'block' : 'none';
+      welcomeTitle.style.display = currentUser ? 'none' : 'block';
+      navLogout.style.display = currentUser ? 'inline' : 'none';
+      if (currentUser && admins.includes(currentUser)) {
         window.location.href = 'admin.html';
       }
     }
 
+    // Initial setup
+    showSection(homepage);
+    if (currentUser) {
+      const user = registrations.find(r => r.email === currentUser);
+      welcomeUsername.textContent = user ? user.username : 'Player';
+    }
+
+    // Navigation events
     navHome.addEventListener('click', (e) => {
       e.preventDefault();
-      window.location.href = 'index.html';
+      showSection(homepage);
     });
 
     navRegister.addEventListener('click', (e) => {
       e.preventDefault();
-      window.location.href = 'index.html?section=register';
+      showSection(registrationSection);
     });
 
     navLogin.addEventListener('click', (e) => {
       e.preventDefault();
-      window.location.href = 'index.html?section=login';
+      showSection(loginSection);
     });
 
     navLogout.addEventListener('click', (e) => {
       e.preventDefault();
       currentUser = null;
-      welcomeMsg.classList.add('hidden');
-      window.location.href = 'index.html';
+      localStorage.removeItem('currentUser');
+      showSection(homepage);
+      welcomeUsername.textContent = 'Player';
+    });
+
+    showLoginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection(loginSection);
+    });
+
+    showRegisterLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection(registrationSection);
     });
 
     // Registration
@@ -171,12 +187,16 @@
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const grade = document.getElementById('grade').value;
+      if (registrations.find(r => r.email === email)) {
+        alert('Email already registered!');
+        return;
+      }
       registrations.push({ username, email, grade, status: 'Pending' });
       localStorage.setItem('registrations', JSON.stringify(registrations));
       currentUser = email;
+      localStorage.setItem('currentUser', email);
       welcomeUsername.textContent = username || 'Player';
-      welcomeMsg.classList.remove('hidden');
-      window.location.href = 'index.html';
+      showSection(homepage);
       regForm.reset();
     });
 
@@ -184,14 +204,15 @@
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
+      if (!registrations.find(r => r.email === email)) {
+        alert('Email not registered!');
+        return;
+      }
       currentUser = email;
+      localStorage.setItem('currentUser', email);
       const user = registrations.find(r => r.email === email);
       welcomeUsername.textContent = user ? user.username : 'Player';
-      welcomeMsg.classList.remove('hidden');
-      window.location.href = 'index.html';
+      showSection(homepage);
       loginForm.reset();
     });
-
-    // Initial setup
-    showSection();
   </script>
