@@ -207,7 +207,7 @@
     let admins = JSON.parse(localStorage.getItem('admins')) || ['admin@school.com'];
     let currentUser = localStorage.getItem('currentUser') || null;
     let serverIp = localStorage.getItem('serverIp') || 'mode-pichunter-joimc.link';
-    let discordLink = localStorage.getItem('discordLink') || 'https://discord.gg/NFgEE8gvGd';
+    let discordLink = localStorage.getItem('discordLink') || 'https://discord.gg/your-discord-invite';
 
     // DOM elements
     const regForm = document.getElementById('reg-form');
@@ -307,6 +307,8 @@
       }
       registrations.push({ username, email, password, grade, status: 'Pending' });
       localStorage.setItem('registrations', JSON.stringify(registrations));
+      saveToProfileJson();
+      sendToSheetDB();
       currentUser = email;
       localStorage.setItem('currentUser', email);
       welcomeUsername.textContent = username || 'Player';
@@ -341,4 +343,46 @@
       setTimeout(checkServerStatus, 5000); // Check every 5 seconds
     }
     checkServerStatus();
+
+    // Save to profile.json
+    async function saveToProfileJson() {
+      const blob = new Blob([JSON.stringify(registrations, null, 2)], { type: 'application/json' });
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'profile.json',
+          types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.error('File System Access API not supported, falling back to localStorage');
+          localStorage.setItem('profileBackup', JSON.stringify(registrations));
+        }
+      }
+    }
+
+    // Send to SheetDB
+    function sendToSheetDB() {
+      registrations.forEach(user => {
+        const formData = new FormData();
+        formData.append('data[nickname]', user.username);
+        formData.append('data[grade]', user.grade || '');
+        formData.append('data[email]', user.email);
+        formData.append('data[password]', user.password);
+
+        fetch('https://sheetdb.io/api/v1/bqauqq803k7zo', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.created === 1) {
+            console.log('Success:', data);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    }
   </script>
